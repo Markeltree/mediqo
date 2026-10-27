@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "Mediqo",
+    "slug": "mediqo",
+    "scheme": "mediqo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F7F9FC"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.mediqo.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Mediqo uses your location to find doctors near you."
+      }
+    },
+    "android": {
+      "package": "com.mediqo.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B8A83"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": ""
+        }
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Mediqo uses your location to find doctors near you."
+        }
+      ],
+      "expo-secure-store",
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "apiUrl": "http://localhost:4000/api",
+      "eas": {
+        "projectId": "af5735ab-0046-49cf-bc7d-16f3e34f9293"
+      },
+      "router": {
+        "origin": false
+      }
+    },
+    "owner": "abdulmaan",
+    "icon": "./assets/icon.png"
+  }
+}

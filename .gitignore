@@ -1,0 +1,25 @@
+node_modules/
+*.log
+.DS_Store
+
+# Secrets: only the *.example files are committed
+.env
+.env.*
+!.env.example
+!.env.local.example
+*firebase-adminsdk*.json
+google-services.json
+*.keystore
+*.jks
+
+# Build output
+.next/
+dist/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# Expo: android/ and ios/ are generated from app.json by `expo prebuild` (EAS Build runs it in the cloud)
+.expo/
+mobile/android/
+mobile/ios/
