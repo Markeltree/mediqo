@@ -4,8 +4,8 @@ import type { ReactNode } from 'react';
 import { FeedbackProvider } from '../components/Feedback';
 
 export const metadata: Metadata = {
-  title: 'Mediqo · Admin',
-  description: 'Manage doctors, patients and appointments',
+  title: 'Mediqo',
+  description: 'Find and book verified doctors, hospitals and clinics near you.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

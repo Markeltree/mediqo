@@ -5,7 +5,7 @@ End-to-end healthcare booking platform.
 | Part     | Stack                                                                              |
 |----------|-------------------------------------------------------------------------------------|
 | `mobile` | React Native (Expo Router), Reanimated animations, expo-location, react-native-maps |
-| `admin`  | Next.js 14 (App Router) web panel for hospitals, clinics, reception staff and the Mediqo team |
+| `admin`  | Next.js 14 (App Router): public website (landing, Terms, Privacy) and the dashboard for hospitals, clinics, reception staff and the Mediqo team |
 | `server` | Node.js + Express, MongoDB (Mongoose, 2dsphere geo queries), JWT auth, Web Push, Anthropic Claude |
 
 ## How it fits together
@@ -65,7 +65,7 @@ Demo accounts (password `Password123!`):
 cd admin
 cp .env.local.example .env.local   # NEXT_PUBLIC_GOOGLE_MAPS_API_KEY turns on the map picker
 npm install
-npm run dev                   # http://localhost:3000 — sign in, or /register a hospital or clinic
+npm run dev                   # http://localhost:3000 — landing page; /login, /register, /dashboard, /terms, /privacy
 ```
 
 ### 3. Mobile app
@@ -113,8 +113,10 @@ On a Pro plan you can use Vercel Cron instead (`"crons": [{ "path": "/api/cron/r
 ### 3. Web panel on Vercel (`admin/`)
 
 1. Vercel → *Add New Project* → same repo → **Root Directory: `admin`** (Next.js is detected).
-2. Environment variables: `NEXT_PUBLIC_API_URL=https://<api>.vercel.app/api`, and optionally `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID`.
+2. Environment variables: `NEXT_PUBLIC_API_URL=https://<api>.vercel.app/api`, `NEXT_PUBLIC_CONTACT_EMAIL` (shown on Terms/Privacy), `NEXT_PUBLIC_PLAY_STORE_URL` (once the app is live), and optionally `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID`.
 3. Deploy, then add the admin URL to the API's `CORS_ORIGINS` and redeploy the API.
+
+The same deployment serves the public site: `/` (landing), `/terms`, `/privacy`, and the dashboard at `/login` → `/dashboard` (Mediqo admins) or `/facility` (hospitals and clinics).
 
 ### 4. Android app on Google Play (`mobile/`)
 
@@ -125,8 +127,8 @@ On a Pro plan you can use Vercel Cron instead (`"crons": [{ "path": "/api/cron/r
    `eas env:create --name GOOGLE_MAPS_ANDROID_API_KEY --value <key> --environment production --visibility sensitive`
 3. `eas build --profile production --platform android`: an `.aab`, signed with a keystore EAS creates and stores for you, version code auto-incremented.
 4. Play Console ($25 one-time developer account) → *Create app* → upload the `.aab` to *Internal testing* first, or run `eas submit --platform android` with a Google service-account key.
-5. Store listing: `mobile/store/playstore-icon-512.png`, `mobile/store/feature-graphic-1024x500.png`, and at least 2 phone screenshots. A privacy policy URL is required.
-6. App content: complete *Data safety* (location, name, email, phone, health info), the *Health apps* declaration, content rating and target audience. New personal developer accounts must run a closed test with 12+ testers for 14 days before production access.
+5. Store listing: `mobile/store/playstore-icon-512.png`, `mobile/store/feature-graphic-1024x500.png` and the phone screenshots `mobile/store/screenshot-*.png`. Privacy policy URL: `https://<admin>/privacy`.
+6. App content: complete *Data safety* (location, name, email, phone, health info), the *Health apps* declaration, content rating and target audience. Account deletion: patients delete in-app (Profile → Delete account); the web link for the form is `https://<admin>/privacy#delete-account`. New personal developer accounts must run a closed test with 12+ testers for 14 days before production access.
 
 ## Production notes
 
@@ -140,6 +142,7 @@ On a Pro plan you can use Vercel Cron instead (`"crons": [{ "path": "/api/cron/r
 |--------|------|---------|
 | POST | `/api/auth/register`, `/api/auth/login` | Sign up / sign in |
 | GET | `/api/auth/me` | Current user |
+| DELETE | `/api/auth/me` | Delete a patient's account and data |
 | PUT | `/api/auth/location` | Save device coordinates |
 | POST | `/api/auth/change-password` | Change (or replace a temporary) password |
 | POST | `/api/facilities/register` | Sign up a hospital (admin account) or clinic (doctor account) |
@@ -152,7 +155,7 @@ On a Pro plan you can use Vercel Cron instead (`"crons": [{ "path": "/api/cron/r
 | * | `/api/facility/*` | Signed-in hospital staff / clinic doctor: details, departments, doctors, staff, appointments |
 | POST | `/api/appointments` | Book a slot (`practiceId`, `startsAt`) |
 | GET | `/api/appointments?scope=upcoming\|past` | My visits |
-| PATCH | `/api/appointments/:id/status` | Confirm / complete / cancel |
+| PATCH | `/api/appointments/:id/status` | Confirm / complete / cancel (confirm and cancel only before the visit starts) |
 | GET | `/api/notifications` | In-app notifications |
 | POST | `/api/ai/chat` | Symptom assistant |
 | POST | `/api/ai/triage` | Specialist suggestion + nearby doctors |

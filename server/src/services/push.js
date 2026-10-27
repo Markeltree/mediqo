@@ -17,7 +17,7 @@ if (WEB_PUSH_ENABLED) {
 function panelUrl(role, data = {}) {
   if (data.type === 'appointment') return role === 'admin' ? '/appointments' : '/facility/appointments';
   if (data.type === 'facility') return role === 'admin' ? '/facilities' : '/facility';
-  return '/';
+  return role === 'admin' ? '/dashboard' : '/facility';
 }
 
 async function sendWeb(user, { title, body, data }) {

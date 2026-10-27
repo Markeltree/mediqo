@@ -14,7 +14,7 @@ type NavItem = { href: string; label: string };
 function navFor(user: User, facility: Facility | null): NavItem[] {
   if (user.role === 'admin') {
     return [
-      { href: '/', label: 'Overview' },
+      { href: '/dashboard', label: 'Overview' },
       { href: '/facilities', label: 'Hospitals & clinics' },
       { href: '/doctors', label: 'Doctors' },
       { href: '/appointments', label: 'Appointments' },

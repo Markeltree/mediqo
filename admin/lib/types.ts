@@ -68,7 +68,7 @@ export const DAY_NAMES =['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export const STAFF_ROLES: Role[] = ['facility_admin', 'receptionist', 'doctor'];
 
 /** Where each role lands after signing in. */
-export const homeFor = (role: Role) => (role === 'admin' ? '/' : '/facility');
+export const homeFor = (role: Role) => (role === 'admin' ? '/dashboard' : '/facility');
 
 /** "Mon–Fri 09:00–17:00"-style summary of weekly timings. */
 export function summarizeSchedule(slots: Slot[]) {

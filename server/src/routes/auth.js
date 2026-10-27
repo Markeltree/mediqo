@@ -2,9 +2,13 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { z } = require('zod');
 const User = require('../models/User');
+const Appointment = require('../models/Appointment');
+const Notification = require('../models/Notification');
 const { signToken, requireAuth } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { HttpError } = require('../middleware/error');
+const { notifyUsers } = require('../services/push');
+const { partiesOf } = require('../services/appointmentRules');
 
 const router = express.Router();
 
@@ -90,6 +94,39 @@ router.patch('/me', requireAuth, async (req, res, next) => {
     for (const key of allowed) if (req.body[key] !== undefined) req.user[key] = req.body[key];
     await req.user.save();
     res.json({ user: req.user.toSafeJSON() });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * Deletes a patient's account and their data (Google Play requires in-app account deletion).
+ * Upcoming visits are cancelled first so the doctor and front desk hear about it. Doctor and staff
+ * accounts are tied to a hospital or clinic, so those are closed by the Mediqo team on request.
+ */
+router.delete('/me', requireAuth, async (req, res, next) => {
+  try {
+    if (req.user.role !== 'patient') {
+      throw new HttpError(403, 'Doctor, hospital and staff accounts are closed by the Mediqo team. Please contact support.');
+    }
+    const upcoming = await Appointment.find({ patient: req.user._id, status: { $in: ['pending', 'confirmed'] }, startsAt: { $gt: new Date() } })
+      .populate('facility', 'name type')
+      .populate({ path: 'doctor', select: 'user', populate: { path: 'user', select: 'name' } });
+    for (const appt of upcoming) {
+      const recipients = (await partiesOf(appt)).filter((id) => id !== String(req.user._id));
+      notifyUsers(recipients, {
+        title: 'Appointment cancelled',
+        body: `${appt.doctor?.user?.name ?? 'A visit'} at ${appt.facility?.name ?? 'your facility'}, ${appt.startsAt.toLocaleString('en-US')} was cancelled because the patient closed their account.`,
+        data: { type: 'appointment' },
+      });
+    }
+
+    await Promise.all([
+      Appointment.deleteMany({ patient: req.user._id }),
+      Notification.deleteMany({ user: req.user._id }),
+    ]);
+    await req.user.deleteOne();
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }

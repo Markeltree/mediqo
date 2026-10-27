@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Shell } from '../components/Shell';
-import { api } from '../lib/api';
+import { Shell } from '../../components/Shell';
+import { api } from '../../lib/api';
 
 type Stats = {
   patients: number;

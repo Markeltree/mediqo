@@ -150,6 +150,10 @@ export default function RegisterPage() {
         <p className="subtle" style={{ margin: '20px 0 0', textAlign: 'center' }}>
           Already registered? <Link href="/login" className="link">Sign in</Link>
         </p>
+        <p className="subtle" style={{ margin: '12px 0 0', textAlign: 'center', fontSize: 13 }}>
+          By registering you agree to our <Link href="/terms" className="link">Terms</Link> and <Link href="/privacy" className="link">Privacy Policy</Link>.{' '}
+          <Link href="/" className="link">Back to website</Link>
+        </p>
       </div>
     </div>
   );

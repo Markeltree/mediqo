@@ -35,7 +35,7 @@ export default function LoginPage() {
   return (
     <div className="login-wrap">
       <div className="card login-card">
-        <div className="brand" style={{ padding: 0 }}>mediqo<span>.</span></div>
+        <Link href="/" className="brand" style={{ padding: 0, display: 'inline-block' }}>mediqo<span>.</span></Link>
         <p className="subtle" style={{ margin: '4px 0 0' }}>Sign in for hospitals, clinics and Mediqo staff</p>
         <form onSubmit={submit}>
           <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
@@ -47,6 +47,9 @@ export default function LoginPage() {
         </form>
         <p className="subtle" style={{ margin: '20px 0 0', textAlign: 'center' }}>
           New here? <Link href="/register" className="link">Register your hospital or clinic</Link>
+        </p>
+        <p className="subtle" style={{ margin: '12px 0 0', textAlign: 'center', fontSize: 13 }}>
+          <Link href="/" className="link">← Back to website</Link> · <Link href="/terms" className="link">Terms</Link> · <Link href="/privacy" className="link">Privacy</Link>
         </p>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
@@ -78,6 +78,28 @@ export default function ProfileScreen() {
     if (ok) logout();
   };
 
+  const [deleting, setDeleting] = useState(false);
+  const deleteAccount = async () => {
+    const ok = await feedback.confirm({
+      title: 'Delete your account?',
+      message: 'This permanently deletes your profile, visits and notifications, and cancels any upcoming visits. It cannot be undone.',
+      confirmText: 'Delete account',
+      cancelText: 'Keep account',
+      destructive: true,
+      icon: 'trash-outline',
+    });
+    if (!ok) return;
+    setDeleting(true);
+    try {
+      await api.delete('/auth/me');
+      await logout();
+      feedback.toast({ tone: 'info', title: 'Account deleted', message: 'Your Mediqo account and data have been removed.' });
+    } catch (e: any) {
+      feedback.alert('Could not delete account', e.message, { tone: 'error' });
+      setDeleting(false);
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -126,12 +148,23 @@ export default function ProfileScreen() {
 
       <FadeInView delay={220} style={styles.section}>
         <View style={styles.card}>
-          <Pressable onPress={signOut} style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}>
+          <Pressable onPress={signOut} style={({ pressed }) => [styles.row, user.role === 'patient' && styles.rowLine, pressed && { opacity: 0.6 }]}>
             <View style={[styles.rowIcon, { backgroundColor: colors.dangerSoft }]}>
               <Ionicons name="log-out-outline" size={18} color={colors.danger} />
             </View>
             <Text variant="bodyMedium" color={colors.danger} style={{ flex: 1 }}>Sign out</Text>
           </Pressable>
+          {user.role === 'patient' && (
+            <Pressable onPress={deleteAccount} disabled={deleting} style={({ pressed }) => [styles.row, (pressed || deleting) && { opacity: 0.6 }]}>
+              <View style={[styles.rowIcon, { backgroundColor: colors.dangerSoft }]}>
+                <Ionicons name="trash-outline" size={18} color={colors.danger} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text variant="bodyMedium" color={colors.danger}>{deleting ? 'Deleting account…' : 'Delete account'}</Text>
+                <Text variant="small" color={colors.muted}>Permanently remove your data</Text>
+              </View>
+            </Pressable>
+          )}
         </View>
         <Text variant="caption" color={colors.faint} center style={{ marginTop: spacing.lg }}>
           Mediqo v{Constants.expoConfig?.version ?? '1.0.0'}
