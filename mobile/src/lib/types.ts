@@ -19,6 +19,8 @@ export interface FacilityRef {
   type: FacilityType;
   address: string;
   phone?: string;
+  /** ISO 4217 code fees are charged in, e.g. PKR, USD */
+  currency?: string;
 }
 
 /** A doctor at one hospital or clinic: what a patient books. `_id` is the practice id. */

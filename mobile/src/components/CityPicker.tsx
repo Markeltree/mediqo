@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Linking, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import * as Location from 'expo-location';
 import { useArea } from '../context/AreaContext';
-import { CITIES, type City } from '../lib/cities';
+import { citiesNear, popularCities, sameCity, searchCities, type City } from '../lib/cities';
 import { colors, fonts, radius, spacing } from '../theme';
 import { Text } from './ui';
 
 /**
- * Bottom sheet for choosing where discovery searches: the device location or a city.
+ * Bottom sheet for choosing where discovery searches: the device location, a city from the built-in world list,
+ * or any place the phone's geocoder can find ("Search anywhere").
  * Shown by the /area route as a transparent modal screen; RN's <Modal> lays out wrongly on Android's new architecture.
  */
 export function CityPickerSheet({ onClose }: { onClose: () => void }) {
@@ -19,7 +21,8 @@ export function CityPickerSheet({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('');
   const [locating, setLocating] = useState(false);
   const [gpsFailed, setGpsFailed] = useState(false);
-
+  const [geocoding, setGeocoding] = useState(false);
+  const [geoError, setGeoError] = useState('');
 
   const pick = async (city: City) => {
     Haptics.selectionAsync().catch(() => undefined);
@@ -36,8 +39,31 @@ export function CityPickerSheet({ onClose }: { onClose: () => void }) {
     else setGpsFailed(true);
   };
 
-  const q = query.trim().toLowerCase();
-  const cities = q ? CITIES.filter((c) => c.name.toLowerCase().includes(q) || c.province.toLowerCase().includes(q)) : CITIES;
+  // Towns too small for the built-in list: ask the platform geocoder (no API key needed)
+  const searchAnywhere = async () => {
+    const text = query.trim();
+    setGeocoding(true);
+    setGeoError('');
+    try {
+      const [hit] = await Location.geocodeAsync(text);
+      if (!hit) throw new Error('not found');
+      const [place] = await Location.reverseGeocodeAsync({ latitude: hit.latitude, longitude: hit.longitude }).catch(() => []);
+      const name = place?.city || place?.subregion || place?.district || text;
+      const region = [place?.region && place.region !== name ? place.region : null, place?.country].filter(Boolean).join(', ');
+      await pick({ name, region, latitude: hit.latitude, longitude: hit.longitude });
+    } catch {
+      setGeoError(`Couldn't find "${text}". Check the spelling or pick a nearby city.`);
+      setGeocoding(false);
+    }
+  };
+
+  const q = query.trim();
+  const near = area?.coords;
+  const cities = useMemo(
+    () => (q ? searchCities(q) : near ? citiesNear(near) : popularCities()),
+    [q, near?.latitude, near?.longitude] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const listTitle = q ? (cities.length ? 'Cities' : '') : near ? 'Nearby cities' : 'Popular cities';
 
   return (
     <View style={styles.root}>
@@ -59,7 +85,9 @@ export function CityPickerSheet({ onClose }: { onClose: () => void }) {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search city"
+            placeholder="Search any city or town"
+            onSubmitEditing={() => q.length >= 2 && !cities.length && searchAnywhere()}
+            returnKeyType="search"
             placeholderTextColor={colors.faint}
             style={styles.searchInput}
           />
@@ -90,13 +118,31 @@ export function CityPickerSheet({ onClose }: { onClose: () => void }) {
 
         <FlatList
           data={cities}
-          keyExtractor={(c) => c.name}
+          keyExtractor={(c) => `${c.name}|${c.latitude},${c.longitude}`}
           keyboardShouldPersistTaps="handled"
           style={{ flexGrow: 0 }}
           ItemSeparatorComponent={() => <View style={styles.sep} />}
-          ListEmptyComponent={<Text variant="small" color={colors.muted} center style={{ padding: spacing.lg }}>No city matches "{query.trim()}"</Text>}
+          ListHeaderComponent={listTitle ? <Text variant="label" color={colors.muted} style={styles.listTitle}>{listTitle}</Text> : null}
+          ListEmptyComponent={<Text variant="small" color={colors.muted} center style={{ paddingTop: spacing.md }}>No city in our list matches "{q}".</Text>}
+          ListFooterComponent={
+            <View>
+              {q.length >= 2 && (
+                <Pressable onPress={searchAnywhere} disabled={geocoding} style={({ pressed }) => [styles.row, styles.anywhere, pressed && { opacity: 0.8 }]}>
+                  <View style={[styles.rowIcon, { backgroundColor: colors.primarySoft }]}>
+                    {geocoding ? <ActivityIndicator size="small" color={colors.primary} /> : <Ionicons name="earth" size={18} color={colors.primary} />}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text variant="bodyMedium" color={colors.primaryDark} numberOfLines={1}>Search anywhere for "{q}"</Text>
+                    <Text variant="small" color={colors.muted}>Find any town, area or address worldwide</Text>
+                  </View>
+                </Pressable>
+              )}
+              {!!geoError && <Text variant="small" color={colors.danger} style={{ paddingHorizontal: 4, paddingBottom: spacing.sm }}>{geoError}</Text>}
+              <Text variant="caption" color={colors.faint} center style={{ paddingVertical: spacing.sm }}>City data © GeoNames (CC BY 4.0)</Text>
+            </View>
+          }
           renderItem={({ item }) => {
-            const active = area?.source === 'city' && area.label === item.name;
+            const active = area?.source === 'city' && sameCity(area.coords, item);
             return (
               <Pressable onPress={() => pick(item)} style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.bg }]}>
                 <View style={styles.rowIcon}>
@@ -104,7 +150,7 @@ export function CityPickerSheet({ onClose }: { onClose: () => void }) {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text variant="bodyMedium">{item.name}</Text>
-                  <Text variant="small" color={colors.muted}>{item.province}</Text>
+                  <Text variant="small" color={colors.muted} numberOfLines={1}>{item.region}</Text>
                 </View>
                 {active && <Ionicons name="checkmark-circle" size={22} color={colors.primary} />}
               </Pressable>
@@ -135,5 +181,7 @@ const styles = StyleSheet.create({
   deviceRow: { marginBottom: spacing.xs },
   rowIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
   sep: { height: 1, backgroundColor: colors.line, marginLeft: 50 },
+  listTitle: { textTransform: 'uppercase', letterSpacing: 0.5, marginTop: spacing.sm, marginBottom: 2 },
+  anywhere: { marginTop: spacing.xs },
   warn: { flexDirection: 'row', gap: 8, padding: 12, borderRadius: radius.md, backgroundColor: colors.warningSoft, marginBottom: spacing.sm },
 });

@@ -6,6 +6,7 @@ import { api } from '../../../lib/api';
 import { useSession } from '../../../lib/session';
 import type { AppointmentRow, AppointmentStatus } from '../../../lib/types';
 import { Notice, useFeedback } from '../../../components/Feedback';
+import { formatFee } from '../../../lib/format';
 
 type Filter = 'pending' | 'upcoming' | 'past';
 
@@ -88,7 +89,7 @@ function Appointments() {
                 <div className="cell-sub">{a.practice?.department?.name ?? a.doctor?.specialty}</div>
               </td>
               <td className="cell-sub" style={{ maxWidth: 220 }}>{a.reason || '—'}</td>
-              <td>{a.fee ? `PKR ${a.fee}` : '—'}</td>
+              <td>{a.fee ? formatFee(a.fee, a.facility?.currency) : '—'}</td>
               <td><span className={`badge ${a.status}`}>{a.status}</span></td>
               <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                 {a.actions?.map((action) => (

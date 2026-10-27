@@ -7,10 +7,16 @@ import { api } from '../../../lib/api';
 import { useSession } from '../../../lib/session';
 import { SPECIALTIES, summarizeSchedule, type Department, type PracticeRow, type Slot } from '../../../lib/types';
 import { Notice, useFeedback } from '../../../components/Feedback';
+import { formatFee } from '../../../lib/format';
 
 const DEFAULT_SLOTS: Slot[] = [1, 2, 3, 4, 5].map((day) => ({ day, start: '09:00', end: '17:00' }));
 
 type Draft = { departmentId: string; fee: string; slotMinutes: string; availability: Slot[] };
+
+function FeeLabel({ here }: { here?: boolean }) {
+  const currency = useSession().facility?.currency || 'PKR';
+  return <label>Consultation fee{here ? ' here' : ''} ({currency})</label>;
+}
 
 const draftOf = (p: PracticeRow): Draft => ({
   departmentId: p.department?._id ?? '',
@@ -60,7 +66,7 @@ function EditPanel({ practice, departments, isHospital, onDone }: {
           </div>
         )}
         <div className="field">
-          <label>Consultation fee (PKR)</label>
+          <FeeLabel />
           <input className="input" type="number" min={0} value={draft.fee} onChange={(e) => setDraft({ ...draft, fee: e.target.value })} />
         </div>
         <div className="field">
@@ -142,7 +148,7 @@ function AddDoctorForm({ departments, onAdded }: { departments: Department[]; on
           </select>
         </div>
         <div className="field">
-          <label>Consultation fee here (PKR)</label>
+          <FeeLabel here />
           <input className="input" type="number" min={0} value={form.fee} onChange={(e) => setForm({ ...form, fee: e.target.value })} />
         </div>
         <div className="field full">
@@ -245,7 +251,7 @@ function Doctors() {
                   <div className="cell-sub">{p.doctor.specialty} · {p.doctor.user.email}</div>
                 </td>
                 {isHospital && <td>{p.department?.name ?? '—'}</td>}
-                <td>PKR {p.fee}</td>
+                <td>{formatFee(p.fee, facility?.currency)}</td>
                 <td className="cell-sub" style={{ maxWidth: 260 }}>{summarizeSchedule(p.availability)} · {p.slotMinutes} min</td>
                 <td>
                   {!p.isActive ? <span className="badge cancelled">Removed</span>

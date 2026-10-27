@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, ActivityIndic
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '../../src/lib/api';
+import { formatFee } from '../../src/lib/format';
 import { Button } from '../../src/components/Button';
 import { FadeInView } from '../../src/components/FadeInView';
 import { LocationMap } from '../../src/components/LocationMap';
@@ -94,7 +95,7 @@ export default function DoctorDetailScreen() {
         <FadeInView style={styles.header}>
           <Text style={styles.name}>{doctor.name}</Text>
           <Text style={styles.specialty}>
-            {doctor.department?.name ? `${doctor.department.name} · ` : ''}{doctor.specialty} · {doctor.experienceYears} yrs
+            {doctor.department?.name && doctor.department.name !== doctor.specialty ? `${doctor.department.name} · ` : ''}{doctor.specialty} · {doctor.experienceYears} yrs
           </Text>
           <Pressable onPress={() => router.push(`/facility/${doctor.facility._id}`)}>
             <Text style={styles.address}>
@@ -103,7 +104,7 @@ export default function DoctorDetailScreen() {
           </Pressable>
           <View style={styles.statRow}>
             <Stat icon="star" label={doctor.rating.toFixed(1)} />
-            <Stat icon="cash-outline" label={`PKR ${doctor.fee}`} />
+            <Stat icon="cash-outline" label={formatFee(doctor.fee, doctor.facility.currency)} />
             <Stat icon="navigate-outline" label={doctor.distanceKm ? `${doctor.distanceKm} km` : 'Nearby'} />
           </View>
         </FadeInView>
@@ -118,7 +119,7 @@ export default function DoctorDetailScreen() {
                   <Text style={styles.otherName}>{p.facility.name}</Text>
                   <Text style={styles.muted}>{p.facility.address}</Text>
                 </View>
-                <Text style={styles.otherFee}>PKR {p.fee}</Text>
+                <Text style={styles.otherFee}>{formatFee(p.fee, p.facility.currency)}</Text>
               </Pressable>
             ))}
           </FadeInView>
@@ -181,7 +182,7 @@ export default function DoctorDetailScreen() {
       <View style={styles.footer}>
         <View>
           <Text style={styles.muted}>Consultation fee</Text>
-          <Text style={styles.price}>PKR {doctor.fee}</Text>
+          <Text style={styles.price}>{formatFee(doctor.fee, doctor.facility.currency)}</Text>
         </View>
         <View style={{ flex: 1, marginLeft: spacing.md }}>
           <Button title={selected ? 'Request appointment' : 'Choose a time'} onPress={book} loading={booking} disabled={!selected} />

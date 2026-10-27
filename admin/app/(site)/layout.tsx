@@ -62,7 +62,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
           </div>
           <div className={s.footerBottom}>
             <span>© {year} {SITE.name}. All rights reserved.</span>
-            <span>Not for emergencies. In a medical emergency, call 1122 or go to the nearest hospital.</span>
+            <span>Not for emergencies. In a medical emergency, call your local emergency number or go to the nearest hospital.</span>
           </div>
         </div>
       </footer>

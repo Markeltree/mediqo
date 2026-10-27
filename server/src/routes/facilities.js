@@ -106,7 +106,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
       findPractices({ facility: facility._id }),
     ]);
     const { name, type, address, phone, location } = facility;
-    res.json({ facility: { _id: facility._id, name, type, address, phone, location }, departments, doctors });
+    res.json({ facility: { _id: facility._id, name, type, address, phone, location, currency: facility.currency }, departments, doctors });
   } catch (err) {
     next(err);
   }

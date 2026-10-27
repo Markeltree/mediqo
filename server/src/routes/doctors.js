@@ -22,7 +22,7 @@ router.get('/me', requireAuth, requireRole('doctor'), async (req, res, next) => 
     const doctor = await Doctor.findOne({ user: req.user._id });
     const practices = doctor
       ? await Practice.find({ doctor: doctor._id })
-        .populate('facility', 'name type address status')
+        .populate('facility', 'name type address status currency')
         .populate('department', 'name')
       : [];
     res.json({ doctor, practices });

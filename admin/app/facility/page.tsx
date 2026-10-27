@@ -8,6 +8,7 @@ import { api } from '../../lib/api';
 import { useSession } from '../../lib/session';
 import type { AppointmentRow, Facility } from '../../lib/types';
 import { Notice } from '../../components/Feedback';
+import { allTimezones, CURRENCIES, currencyLabel } from '../../lib/format';
 
 const STATUS_COPY: Record<Facility['status'], { cls: string; text: string }> = {
   pending: { cls: 'warn', text: 'Under review by Mediqo. Patients will see you once approved — meanwhile you can set everything up.' },
@@ -19,7 +20,7 @@ function Overview() {
   const { facility, canManage, reload, user } = useSession();
   const [pending, setPending] = useState<number | null>(null);
   const [today, setToday] = useState<number | null>(null);
-  const [form, setForm] = useState({ name: '', phone: '', address: '', licenseNo: '', lat: '', lng: '' });
+  const [form, setForm] = useState({ name: '', phone: '', address: '', licenseNo: '', lat: '', lng: '', currency: 'PKR', timezone: 'Asia/Karachi' });
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
 
@@ -28,6 +29,7 @@ function Overview() {
     setForm({
       name: facility.name, phone: facility.phone || '', address: facility.address, licenseNo: facility.licenseNo || '',
       lat: String(facility.location.coordinates[1]), lng: String(facility.location.coordinates[0]),
+      currency: facility.currency || 'PKR', timezone: facility.timezone || 'Asia/Karachi',
     });
     api<{ appointments: AppointmentRow[] }>('/facility/appointments?scope=upcoming').then(({ appointments }) => {
       setPending(appointments.filter((a) => a.status === 'pending').length);
@@ -58,6 +60,7 @@ function Overview() {
         body: JSON.stringify({
           name: form.name, address: form.address, lat: Number(form.lat), lng: Number(form.lng),
           phone: form.phone || undefined, licenseNo: form.licenseNo || undefined,
+          currency: form.currency, timezone: form.timezone,
         }),
       });
       await reload();
@@ -120,6 +123,18 @@ function Overview() {
         <div className="field">
           <label>Registration / license no.</label>
           <input className="input" value={form.licenseNo} disabled={!canManage} onChange={(e) => setForm({ ...form, licenseNo: e.target.value })} />
+        </div>
+        <div className="field">
+          <label>Currency for fees</label>
+          <select className="input" value={form.currency} disabled={!canManage} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
+            {[...new Set([form.currency, ...CURRENCIES])].map((c) => <option key={c} value={c}>{currencyLabel(c)}</option>)}
+          </select>
+        </div>
+        <div className="field">
+          <label>Timezone (doctor timings use it)</label>
+          <select className="input" value={form.timezone} disabled={!canManage} onChange={(e) => setForm({ ...form, timezone: e.target.value })}>
+            {allTimezones(form.timezone).map((z) => <option key={z} value={z}>{z.replace(/_/g, ' ')}</option>)}
+          </select>
         </div>
         {canManage && (
           <>

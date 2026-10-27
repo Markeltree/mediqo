@@ -18,6 +18,8 @@ export type Facility = {
   address: string;
   licenseNo?: string;
   timezone?: string;
+  /** ISO 4217 code fees are charged in */
+  currency?: string;
   location: { coordinates: [number, number] };
   status: 'pending' | 'approved' | 'rejected';
   rejectionReason?: string;
@@ -53,7 +55,7 @@ export type AppointmentRow = {
   actions?: ('confirm' | 'complete' | 'cancel')[];
   patient?: { name: string; phone?: string };
   doctor?: { specialty: string; user?: { name: string } };
-  facility?: { name: string; type: 'hospital' | 'clinic' };
+  facility?: { name: string; type: 'hospital' | 'clinic'; currency?: string };
   practice?: { department?: { name: string } };
 };
 

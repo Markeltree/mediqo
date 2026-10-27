@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, shadow, spacing } from '../theme';
 import { Avatar, Text } from './ui';
-import { formatKm } from '../lib/format';
+import { formatFee, formatKm } from '../lib/format';
 import type { Practice } from '../lib/types';
 
 export function DoctorCard({ doctor, onPress, hideFacility }: { doctor: Practice; onPress: () => void; hideFacility?: boolean }) {
@@ -35,7 +35,7 @@ export function DoctorCard({ doctor, onPress, hideFacility }: { doctor: Practice
         <Meta icon="briefcase-outline" label={`${doctor.experienceYears} yrs`} />
         {doctor.distanceKm !== undefined && <Meta icon="navigate-outline" label={formatKm(doctor.distanceKm)} />}
         <View style={styles.fee}>
-          <Text variant="label" color={colors.primaryDark}>Rs {doctor.fee.toLocaleString()}</Text>
+          <Text variant="label" color={colors.primaryDark}>{formatFee(doctor.fee, doctor.facility.currency)}</Text>
         </View>
       </View>
     </Pressable>

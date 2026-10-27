@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCurrentCoords, saveLocationToProfile, type Coords } from '../lib/location';
-import { CITIES, type City } from '../lib/cities';
+import { findCityByName, type City } from '../lib/cities';
 import { useAuth } from './AuthContext';
 
 /** Where discovery searches around: the device (gps), a city the user picked, or the last location saved on their profile. */
@@ -19,10 +19,16 @@ type AreaState = {
 const PREF_KEY = 'mediqo_area_city';
 const AreaContext = createContext<AreaState | null>(null);
 
-const readPref = async () => {
+// The chosen place is stored with its coordinates, so towns found by "Search anywhere" survive a restart too
+const readPref = async (): Promise<City | null> => {
   try {
-    const name = await AsyncStorage.getItem(PREF_KEY);
-    return CITIES.find((c) => c.name === name) ?? null;
+    const raw = await AsyncStorage.getItem(PREF_KEY);
+    if (!raw) return null;
+    if (raw.startsWith('{')) {
+      const c = JSON.parse(raw);
+      return typeof c.latitude === 'number' && typeof c.longitude === 'number' ? c : null;
+    }
+    return findCityByName(raw, 'Pakistan'); // older versions saved just the name of a Pakistani city
   } catch {
     return null;
   }
@@ -76,7 +82,7 @@ export function AreaProvider({ children }: { children: React.ReactNode }) {
 
   const chooseCity = async (city: City | null) => {
     try {
-      if (city) await AsyncStorage.setItem(PREF_KEY, city.name);
+      if (city) await AsyncStorage.setItem(PREF_KEY, JSON.stringify(city));
       else await AsyncStorage.removeItem(PREF_KEY);
     } catch {
       // Storage failing only means the choice is not remembered next launch

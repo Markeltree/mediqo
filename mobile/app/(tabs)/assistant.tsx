@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { api } from '../../src/lib/api';
+import { formatFee } from '../../src/lib/format';
 import { useArea } from '../../src/context/AreaContext';
 import { FadeInView } from '../../src/components/FadeInView';
 import { Avatar, Text, feedback } from '../../src/components/ui';
@@ -232,7 +233,7 @@ export default function AssistantScreen() {
                         {d.facility.name}{d.distanceKm !== undefined ? ` · ${d.distanceKm} km` : ''}
                       </Text>
                     </View>
-                    <Text variant="label" color={colors.primaryDark}>Rs {d.fee.toLocaleString()}</Text>
+                    <Text variant="label" color={colors.primaryDark}>{formatFee(d.fee, d.facility.currency)}</Text>
                     <Ionicons name="chevron-forward" size={16} color={colors.faint} />
                   </Pressable>
                 ))}

@@ -17,6 +17,7 @@ const facilityDetailsSchema = z.object({
   address: z.string().min(3).max(200),
   licenseNo: z.string().max(50).optional(),
   timezone: z.string().refine(isValidTimezone, 'Unknown timezone').optional(),
+  currency: z.string().regex(/^[A-Za-z]{3}$/, 'Use a 3-letter currency code, e.g. USD').transform((c) => c.toUpperCase()).optional(),
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
 });

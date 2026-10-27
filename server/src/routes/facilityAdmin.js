@@ -295,7 +295,7 @@ router.get('/appointments', async (req, res, next) => {
     const appointments = await Appointment.find(filter)
       .populate('patient', 'name phone')
       .populate({ path: 'doctor', select: 'specialty user', populate: { path: 'user', select: 'name' } })
-      .populate('facility', 'name type')
+      .populate('facility', 'name type currency')
       .populate({ path: 'practice', select: 'department', populate: { path: 'department', select: 'name' } })
       .sort({ startsAt: req.query.scope === 'past' ? -1 : 1 })
       .limit(300);

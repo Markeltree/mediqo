@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
-import { mapProvider, openDirections } from '../lib/maps';
+import { mapProvider, mapsAvailable, openDirections } from '../lib/maps';
 import { colors, radius, shadowLg } from '../theme';
 import { Text } from './ui/Text';
 
@@ -16,8 +16,33 @@ type Props = {
   bottomInset?: number;
 };
 
-/** A static Google map with a branded pin and a "Directions" button. */
+function Pin({ icon }: { icon: React.ComponentProps<typeof Ionicons>['name'] }) {
+  return (
+    <View style={styles.pinWrap}>
+      <View style={styles.pin}>
+        <Ionicons name={icon} size={16} color="#fff" />
+      </View>
+      <View style={styles.pinTip} />
+    </View>
+  );
+}
+
+/** A static Google map with a branded pin and a "Directions" button. Without a Maps key it shows a placeholder instead. */
 export function LocationMap({ lat, lng, title, icon = 'medkit', style, bottomInset = 12 }: Props) {
+  if (!mapsAvailable) {
+    return (
+      <View style={[styles.wrap, styles.placeholder, style]}>
+        <View style={styles.ringOuter} />
+        <View style={styles.ringInner} />
+        <Pin icon={icon} />
+        <Pressable onPress={() => openDirections(lat, lng)} style={({ pressed }) => [styles.directions, { bottom: bottomInset }, pressed && { opacity: 0.85 }]}>
+          <Ionicons name="navigate" size={15} color="#fff" />
+          <Text variant="label" color="#fff">Directions</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.wrap, style]}>
       <MapView
@@ -32,12 +57,7 @@ export function LocationMap({ lat, lng, title, icon = 'medkit', style, bottomIns
         showsPointsOfInterest={false}
       >
         <Marker coordinate={{ latitude: lat, longitude: lng }} title={title} anchor={{ x: 0.5, y: 1 }}>
-          <View style={styles.pinWrap}>
-            <View style={styles.pin}>
-              <Ionicons name={icon} size={16} color="#fff" />
-            </View>
-            <View style={styles.pinTip} />
-          </View>
+          <Pin icon={icon} />
         </Marker>
       </MapView>
       <Pressable onPress={() => openDirections(lat, lng)} style={({ pressed }) => [styles.directions, { bottom: bottomInset }, pressed && { opacity: 0.85 }]}>
@@ -50,6 +70,9 @@ export function LocationMap({ lat, lng, title, icon = 'medkit', style, bottomIns
 
 const styles = StyleSheet.create({
   wrap: { overflow: 'hidden', backgroundColor: colors.surfaceAlt },
+  placeholder: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
+  ringOuter: { position: 'absolute', width: 220, height: 220, borderRadius: 110, borderWidth: 1, borderColor: 'rgba(11,138,131,0.15)' },
+  ringInner: { position: 'absolute', width: 120, height: 120, borderRadius: 60, backgroundColor: 'rgba(11,138,131,0.08)' },
   pinWrap: { alignItems: 'center' },
   pin: {
     width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center',

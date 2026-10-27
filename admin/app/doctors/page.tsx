@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Shell } from '../../components/Shell';
 import { api } from '../../lib/api';
+import { formatFee } from '../../lib/format';
 
 type DoctorRow = {
   _id: string;
@@ -11,7 +12,7 @@ type DoctorRow = {
   experienceYears?: number;
   isVerified: boolean;
   user: { name: string; email: string; phone?: string };
-  practices: { fee: number; facility: { name: string; type: 'hospital' | 'clinic'; status: string } }[];
+  practices: { fee: number; facility: { name: string; type: 'hospital' | 'clinic'; status: string; currency?: string } }[];
 };
 
 export default function DoctorsPage() {
@@ -41,7 +42,7 @@ export default function DoctorsPage() {
       <table>
         <thead>
           <tr>
-            <th>Name</th><th>Specialty</th><th>PMDC no.</th><th>Sits at</th><th>Status</th><th />
+            <th>Name</th><th>Specialty</th><th>License no.</th><th>Sits at</th><th>Status</th><th />
           </tr>
         </thead>
         <tbody>
@@ -60,7 +61,7 @@ export default function DoctorsPage() {
                 {d.practices.length === 0 && <span className="cell-sub">Not attached anywhere</span>}
                 {d.practices.map((p, i) => (
                   <div key={i} style={{ fontSize: 13 }}>
-                    {p.facility.name} <span className="cell-sub">({p.facility.type}, PKR {p.fee})</span>
+                    {p.facility.name} <span className="cell-sub">({p.facility.type}, {formatFee(p.fee, p.facility.currency)})</span>
                   </div>
                 ))}
               </td>

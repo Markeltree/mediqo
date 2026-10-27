@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api, setToken } from '../../lib/api';
 import { LocationFields } from '../../components/LocationFields';
 import { SPECIALTIES } from '../../lib/types';
 import { Notice } from '../../components/Feedback';
+import { browserTimezone, CURRENCIES, currencyLabel, guessCurrency } from '../../lib/format';
 
 type Kind = 'hospital' | 'clinic';
 
@@ -16,6 +17,15 @@ export default function RegisterPage() {
   const [account, setAccount] = useState({ name: '', email: '', password: '', phone: '' });
   const [facility, setFacility] = useState({ name: '', phone: '', address: '', licenseNo: '', lat: '', lng: '' });
   const [doctor, setDoctor] = useState({ specialty: SPECIALTIES[0], experienceYears: '', licenseNo: '', fee: '' });
+  // Timings are wall-clock times where the facility is, so its zone comes from this browser (editable later in settings)
+  const [timezone, setTimezone] = useState('Asia/Karachi');
+  const [currency, setCurrency] = useState('PKR');
+  // Read in an effect: the page is prerendered on a server whose zone is UTC
+  useEffect(() => {
+    const tz = browserTimezone();
+    setTimezone(tz);
+    setCurrency(guessCurrency(tz));
+  }, []);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -33,6 +43,7 @@ export default function RegisterPage() {
         facility: {
           name: facility.name, address: facility.address, lat, lng,
           phone: facility.phone || undefined, licenseNo: facility.licenseNo || undefined,
+          timezone, currency,
         },
         doctor: kind === 'clinic'
           ? {
@@ -103,7 +114,7 @@ export default function RegisterPage() {
                   </select>
                 </div>
                 <div className="field">
-                  <label>PMDC registration no.</label>
+                  <label>Medical registration / license no.</label>
                   <input className="input" value={doctor.licenseNo} onChange={(e) => setDoctor({ ...doctor, licenseNo: e.target.value })} />
                 </div>
                 <div className="field">
@@ -111,7 +122,7 @@ export default function RegisterPage() {
                   <input className="input" type="number" min={0} value={doctor.experienceYears} onChange={(e) => setDoctor({ ...doctor, experienceYears: e.target.value })} />
                 </div>
                 <div className="field">
-                  <label>Consultation fee (PKR)</label>
+                  <label>Consultation fee ({currency})</label>
                   <input className="input" type="number" min={0} value={doctor.fee} onChange={(e) => setDoctor({ ...doctor, fee: e.target.value })} />
                 </div>
               </div>
@@ -127,6 +138,16 @@ export default function RegisterPage() {
             <div className="field">
               <label>Front desk phone</label>
               <input className="input" value={facility.phone} onChange={(e) => setFacility({ ...facility, phone: e.target.value })} />
+            </div>
+            <div className="field">
+              <label>Currency for fees</label>
+              <select className="input" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                {CURRENCIES.map((c) => <option key={c} value={c}>{currencyLabel(c)}</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label>Timezone</label>
+              <input className="input" value={timezone} disabled title="Detected from this device; change it later in your facility settings" />
             </div>
             <div className="field full">
               <label>Address</label>

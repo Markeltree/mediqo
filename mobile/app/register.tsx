@@ -118,7 +118,7 @@ export default function RegisterScreen() {
 
           <Input label="Full name" icon="person-outline" placeholder={role === 'doctor' ? 'Dr. Ayesha Khan' : 'Ali Raza'} autoComplete="name" value={form.name} onChangeText={set('name')} error={errors.name} />
           <Input label="Email" icon="mail-outline" placeholder="you@example.com" autoCapitalize="none" autoComplete="email" keyboardType="email-address" value={form.email} onChangeText={set('email')} error={errors.email} />
-          <Input label="Phone (optional)" icon="call-outline" placeholder="+92 300 1234567" keyboardType="phone-pad" autoComplete="tel" value={form.phone} onChangeText={set('phone')} error={errors.phone} hint="Used for appointment reminders" />
+          <Input label="Phone (optional)" icon="call-outline" placeholder="+1 555 123 4567" keyboardType="phone-pad" autoComplete="tel" value={form.phone} onChangeText={set('phone')} error={errors.phone} hint="Used for appointment reminders" />
           <Input label="Password" icon="lock-closed-outline" placeholder="At least 8 characters" secureTextEntry value={form.password} onChangeText={set('password')} error={errors.password} />
 
           {form.password.length > 0 && (
@@ -134,7 +134,7 @@ export default function RegisterScreen() {
             <View style={styles.note}>
               <Ionicons name="information-circle" size={18} color={colors.accent} />
               <Text variant="small" color={colors.inkSoft} style={{ flex: 1 }}>
-                Patients will see your profile once the Mediqo team verifies your PMDC registration.
+                Patients will see your profile once the Mediqo team verifies your medical registration.
               </Text>
             </View>
           )}

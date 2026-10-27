@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Shell } from '../../components/Shell';
 import { api } from '../../lib/api';
+import { formatFee } from '../../lib/format';
 
 type Row = {
   _id: string;
@@ -12,7 +13,7 @@ type Row = {
   reason?: string;
   patient?: { name: string };
   doctor?: { specialty: string; user?: { name: string } };
-  facility?: { name: string; type: string };
+  facility?: { name: string; type: string; currency?: string };
 };
 
 export default function AppointmentsPage() {
@@ -44,7 +45,7 @@ export default function AppointmentsPage() {
                 <div style={{ color: 'var(--muted)', fontSize: 12, textTransform: 'capitalize' }}>{a.facility?.type}</div>
               </td>
               <td style={{ maxWidth: 240, color: 'var(--muted)' }}>{a.reason || '—'}</td>
-              <td>{a.fee ? `PKR ${a.fee}` : '—'}</td>
+              <td>{a.fee ? formatFee(a.fee, a.facility?.currency) : '—'}</td>
               <td><span className={`badge ${a.status}`}>{a.status}</span></td>
             </tr>
           ))}

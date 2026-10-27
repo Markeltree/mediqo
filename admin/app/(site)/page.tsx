@@ -183,7 +183,7 @@ export default function LandingPage() {
               <Icon name="alert" size={20} style={{ flexShrink: 0, marginTop: 2 }} />
               <span>
                 Mediqo helps you find and book doctors. It does not provide medical diagnosis or treatment, and the assistant is not a substitute
-                for a doctor. In an emergency, call <strong>1122</strong> or go to the nearest hospital.
+                for a doctor. In an emergency, call your local emergency number or go to the nearest hospital.
               </span>
             </div>
           </div>

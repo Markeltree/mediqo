@@ -89,7 +89,7 @@ router.get('/doctors', async (req, res, next) => {
     const filter = req.query.verified === 'false' ? { isVerified: false } : {};
     const doctors = await Doctor.find(filter).populate('user', 'name email phone isActive').sort({ createdAt: -1 }).lean();
     const practices = await Practice.find({ doctor: { $in: doctors.map((d) => d._id) }, isActive: true })
-      .populate('facility', 'name type status')
+      .populate('facility', 'name type status currency')
       .select('doctor facility fee')
       .lean();
     const byDoctor = {};
@@ -141,7 +141,7 @@ router.get('/appointments', async (_req, res, next) => {
     const appointments = await Appointment.find()
       .populate('patient', 'name')
       .populate({ path: 'doctor', select: 'specialty user', populate: { path: 'user', select: 'name' } })
-      .populate('facility', 'name type')
+      .populate('facility', 'name type currency')
       .sort({ startsAt: -1 })
       .limit(200);
     res.json({ appointments });

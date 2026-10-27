@@ -10,6 +10,8 @@ const facilitySchema = new mongoose.Schema(
     licenseNo: { type: String, trim: true },
     // Doctors' timings ("09:00") are wall-clock times in this zone
     timezone: { type: String, default: 'Asia/Karachi' },
+    // ISO 4217 code that fees at this facility are charged in
+    currency: { type: String, default: 'PKR', uppercase: true, match: /^[A-Z]{3}$/ },
     location: {
       type: { type: String, enum: ['Point'], default: 'Point' },
       coordinates: { type: [Number], required: true }, // [lng, lat]

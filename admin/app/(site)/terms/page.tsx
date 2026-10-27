@@ -36,7 +36,7 @@ const SECTIONS: LegalSection[] = [
           The in-app assistant gives general information to help you choose a type of specialist. It may be incomplete or wrong, it is not a
           substitute for professional advice, and you should not rely on it for diagnosis or treatment decisions.
         </p>
-        <p><strong>Not for emergencies.</strong> If you think you have a medical emergency, call 1122 or go to the nearest hospital immediately.</p>
+        <p><strong>Not for emergencies.</strong> If you think you have a medical emergency, call your local emergency number (such as 1122 in Pakistan, 911 in the US or 999 in the UK) or go to the nearest hospital immediately.</p>
       </>
     ),
   },
@@ -72,7 +72,7 @@ const SECTIONS: LegalSection[] = [
     title: 'Terms for hospitals, clinics and doctors',
     body: (
       <ul>
-        <li>Facilities and doctors appear to patients only after Mediqo approves the facility and verifies each doctor. We may ask for documents such as a valid PMDC registration and may refuse or remove a listing at our discretion.</li>
+        <li>Facilities and doctors appear to patients only after Mediqo approves the facility and verifies each doctor. We may ask for documents such as a valid medical registration (for example PMDC in Pakistan) and may refuse or remove a listing at our discretion.</li>
         <li>You confirm that every doctor you list is properly qualified, licensed and authorised to practise, and that the fees, timings and details you publish are accurate and kept up to date.</li>
         <li>You are solely responsible for the medical services you provide, for your staff, and for complying with all laws that apply to you, including medical, consumer and data protection laws.</li>
         <li>Patient information you receive through Mediqo may be used only to provide and manage that patient’s care, must be kept confidential and secure, and must not be used for marketing.</li>
@@ -160,7 +160,7 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Terms & Conditions"
-      intro={<>Mediqo helps you find and book doctors. It is not a healthcare provider and is not for emergencies. In an emergency, call 1122.</>}
+      intro={<>Mediqo helps you find and book doctors. It is not a healthcare provider and is not for emergencies. In an emergency, call your local emergency number.</>}
       sections={SECTIONS}
     />
   );

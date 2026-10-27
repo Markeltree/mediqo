@@ -58,7 +58,7 @@ export default function LoginScreen() {
               Verified doctors near you. Book in seconds.
             </Text>
             <View style={styles.trustRow}>
-              <Trust icon="shield-checkmark" label="PMDC verified" />
+              <Trust icon="shield-checkmark" label="Verified doctors" />
               <Trust icon="time" label="Instant booking" />
             </View>
           </FadeInView>

@@ -25,7 +25,10 @@ const PUBLIC_PROJECT = [
       name: '$user.name', avatarUrl: '$user.avatarUrl',
       specialty: '$doctor.specialty', bio: '$doctor.bio', experienceYears: '$doctor.experienceYears',
       rating: '$doctor.rating', reviewsCount: '$doctor.reviewsCount',
-      facility: { _id: '$facility._id', name: '$facility.name', type: '$facility.type', address: '$facility.address', phone: '$facility.phone' },
+      facility: {
+        _id: '$facility._id', name: '$facility.name', type: '$facility.type', address: '$facility.address', phone: '$facility.phone',
+        currency: { $ifNull: ['$facility.currency', 'PKR'] }, // facilities created before currencies existed
+      },
       department: { _id: '$department._id', name: '$department.name' },
     },
   },
